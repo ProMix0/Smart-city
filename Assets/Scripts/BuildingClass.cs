@@ -1,12 +1,14 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Assets.Scripts
+namespace Assets.InGame
 {
     public class Building
     {
         private GameObject model;
+        public List<BuildingPart> Parts { get; private set; } = new List<BuildingPart>();
         public City CityParent { get; private set; }
 
         internal Building(string path, City city)
@@ -14,6 +16,27 @@ namespace Assets.Scripts
             CityParent = city;
             //TODO добавление 3D модели
         }
+
+        public bool Is<T>()
+        {
+            foreach (var item in Parts)
+            {
+                if (item is T)
+                    return true;
+            }
+            return false;
+        }
+        public T As<T>()
+            where T : BuildingPart
+        {
+            foreach (var item in Parts)
+            {
+                if (item is T)
+                    return (T)item;
+            }
+            return null;
+        }
+
         public void SetCoordinates(int x, int y, int z)
         {
             model.transform.position = new Vector3(x, y, z);
@@ -23,51 +46,201 @@ namespace Assets.Scripts
             //TODO метод, который выводит модель на экран и делает её статичной (запрет на перемещение)
         }
     }
-    public interface IBuildingPart{}
-    public interface IHouse:IBuildingPart
+
+    #region Interfaces
+
+    public abstract class BuildingPart
     {
-        int MaxCitizenCount { get; }
-        int CitizenCount { get; }
-        List<Citizen> Citizens { get; }
+        protected Building parent;
     }
-    public interface IPollute:IBuildingPart
+    public class House : BuildingPart
     {
-        int BasePollution { get; }
-        int FinalPollution { set; }
-        void Pollute();
+        public int MaxResidentsCount { get; private set; }
+        public int ResidentsCount { get => Residents.Count; }
+        public List<Citizen> Residents { get; private set; } = new List<Citizen>();
+
+        public void AddResident(Citizen citizen)
+        {
+            if (ResidentsCount < MaxResidentsCount)
+            {
+                Residents.Add(citizen);
+            }
+            else
+            {
+                throw new InvalidOperationException("Can't add citizen");
+            }
+        }
+
+        public void RemoveResident(Citizen citizen)
+        {
+            Residents.Remove(citizen);
+        }
     }
-    public interface IResourceStorage
+    public class Pollute : BuildingPart
     {
-        Dictionary<IResource,int> MaxCapacity { get; }
-        Dictionary<IResource, int> InStorage { get; }
+        public int BasePollution { get; private set; }
+        public int PollutionMultiplier { get; set; }
+        void ThrowPollution()
+        {
+            //TODO pollution
+        }
     }
-    public interface IConsumer:IBuildingPart, IResourceStorage
+    public class ResourceStorage : BuildingPart
     {
-        Dictionary<IResource,int> Consuming { get; }
-        bool TryConsume();
-        void Consume();
+        private readonly Dictionary<Resource, int> maxCapacity = new Dictionary<Resource, int>();
+        private readonly Dictionary<Resource, int> inStorage = new Dictionary<Resource, int>();
+
+        public int InStorage(Resource resource)
+        {
+            return inStorage[resource];
+        }
+        public int sMaxCapacity(Resource resource)
+        {
+            return maxCapacity[resource];
+        }
+        public void Add(Resource resource, int count)
+        {
+            if (maxCapacity[resource] > inStorage[resource])
+            {
+                inStorage[resource] += count;
+            }
+            else
+            {
+                throw new InvalidOperationException("Can't add resources");
+            }
+        }
+
+        public void Add(Dictionary<Resource, int> toAdd)
+        {
+            foreach (var item in toAdd)
+            {
+                if (maxCapacity[item.Key] > inStorage[item.Key])
+                {
+                    throw new InvalidOperationException("Can't add resources");
+                }
+            }
+            foreach (var item in toAdd)
+            {
+                inStorage[item.Key] += item.Value;
+            }
+        }
+
+        public void Substract(Resource resource, int count)
+        {
+            if (inStorage[resource] - count >= 0)
+            {
+                inStorage[resource] -= count;
+            }
+            else
+            {
+                throw new InvalidOperationException("Can't substract resources");
+            }
+        }
+
+        public void Substract(Dictionary<Resource, int> toSub)
+        {
+            foreach (var item in toSub)
+            {
+                if (inStorage[item.Key] - item.Value >= 0)
+                {
+                    throw new InvalidOperationException("Can't substract resources");
+                }
+            }
+            foreach (var item in toSub)
+            {
+                inStorage[item.Key] -= item.Value;
+            }
+        }
     }
-    public interface IProducter : IBuildingPart, IResourceStorage
+    public class Consumer : BuildingPart
     {
-        Dictionary<IResource, int> Producting { get; }
-        bool TryProduct();
-        void Product();
+        private ResourceStorage Storage
+        {
+            get
+            {
+                return parent.As<ResourceStorage>();
+            }
+        }
+
+        public Dictionary<Resource, int> Consuming { get; private set; }
+        public void Consume()
+        {
+            if (TryConsume())
+            {
+                Storage.Substract(Consuming);
+            }
+            else
+            {
+                throw new InvalidOperationException("Can't consume resources");
+            }
+        }
+
+        public bool TryConsume()
+        {
+            foreach (var item in Consuming)
+            {
+                if (Storage.InStorage(item.Key) < item.Value)
+                    return false;
+            }
+            return true;
+        }
     }
-    public interface IUseCitizen:IBuildingPart
+    public class Producter : BuildingPart
     {
-        int NeedCount { get; }
-        List<Citizen> Citizens { get; }
-        bool HaveNeededCount();
+        private ResourceStorage Storage
+        {
+            get
+            {
+                return parent.As<ResourceStorage>();
+            }
+        }
+        public Dictionary<Resource, int> Producting { get; private set; }
+        public void Product()
+        {
+            if (TryProduct())
+            {
+                Storage.Add(Producting);
+            }
+            else
+            {
+                throw new InvalidOperationException("Can't product resources");
+            }
+        }
+
+        public bool TryProduct()
+        {
+            foreach (var item in Producting)
+            {
+                if (Storage.InStorage(item.Key) >= Storage.MaxCapacity(item.Key))
+                    return false;
+            }
+            return true;
+        }
     }
-    public interface IRestPoint:IBuildingPart
+    public class UseCitizen : BuildingPart
     {
-        int MaxCitizenCount { get; }
-        int CitizenCount { get; }
-        List<Citizen> Citizens { get; }
-        void Rest();
+        public int NeedCitizens { get; private set; }
+        public List<Citizen> Citizens { get; private set; }
+        public bool HaveNeededCount()
+        {
+            return Citizens.Count >= NeedCitizens;
+        }
     }
-    public interface ITransportNet:IBuildingPart
+    public class RestPoint : BuildingPart
+    {
+        public int MaxCitizenCount { get; private set; }
+        public int CitizenCount { get => Citizens.Count; }
+        public List<Citizen> Citizens { get; private set; }
+        void Rest()
+        {
+            //TODO rest
+        }
+    }
+    public class TransportNet : BuildingPart
     {
         //TODO... All...
     }
+
+    #endregion
+
 }

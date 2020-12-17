@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace Assets.Scripts
+namespace Assets.InGame
 {
-    public interface IResource
+    public enum Resource
     {
 
     }
