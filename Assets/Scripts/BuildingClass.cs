@@ -10,10 +10,14 @@ namespace Assets.InGame
         protected GameObject model;
         protected List<BuildingPart> Parts { get; private set; } = new List<BuildingPart>();
         public City CityParent { get; private set; }
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
-        public Building(string path, City city)
+        public Building(City city,string path, int width, int height)
         {
             CityParent = city;
+            Width = width;
+            Height = height;
             //TODO добавление 3D модели
         }
 
