@@ -7,11 +7,11 @@ namespace Assets.InGame
 {
     public class Building
     {
-        private GameObject model;
-        public List<BuildingPart> Parts { get; private set; } = new List<BuildingPart>();
+        protected GameObject model;
+        protected List<BuildingPart> Parts { get; private set; } = new List<BuildingPart>();
         public City CityParent { get; private set; }
 
-        internal Building(string path, City city)
+        public Building(string path, City city)
         {
             CityParent = city;
             //TODO добавление 3D модели
@@ -31,8 +31,8 @@ namespace Assets.InGame
         {
             foreach (var item in Parts)
             {
-                if (item is T)
-                    return (T)item;
+                if (item is T t)
+                    return t;
             }
             return null;
         }
@@ -59,6 +59,12 @@ namespace Assets.InGame
         public int ResidentsCount { get => Residents.Count; }
         public List<Citizen> Residents { get; private set; } = new List<Citizen>();
 
+        public House(Building parent, int maxResidentsCount)
+        {
+            this.parent = parent;
+            MaxResidentsCount = maxResidentsCount;
+        }
+
         public void AddResident(Citizen citizen)
         {
             if (ResidentsCount < MaxResidentsCount)
@@ -80,7 +86,14 @@ namespace Assets.InGame
     {
         public int BasePollution { get; private set; }
         public int PollutionMultiplier { get; set; }
-        void ThrowPollution()
+
+        public Pollute(Building parent, int basePollution)
+        {
+            this.parent = parent;
+            BasePollution = basePollution;
+        }
+
+        public void ThrowPollution()
         {
             //TODO pollution
         }
@@ -90,11 +103,22 @@ namespace Assets.InGame
         private readonly Dictionary<Resource, int> maxCapacity = new Dictionary<Resource, int>();
         private readonly Dictionary<Resource, int> inStorage = new Dictionary<Resource, int>();
 
+        public ResourceStorage(Building parent, Dictionary<Resource, int> maxCapacity)
+        {
+            this.parent = parent;
+            foreach (var str in Enum.GetNames(typeof(Resource)))
+            {
+                this.maxCapacity[(Resource)Enum.Parse(typeof(Resource), str)] = maxCapacity.ContainsKey((Resource)Enum.Parse(typeof(Resource), str)) ?
+                    maxCapacity[(Resource)Enum.Parse(typeof(Resource), str)] : 0;
+                inStorage[(Resource)Enum.Parse(typeof(Resource), str)] = 0;
+            }
+        }
+
         public int InStorage(Resource resource)
         {
             return inStorage[resource];
         }
-        public int sMaxCapacity(Resource resource)
+        public int MaxCapacity(Resource resource)
         {
             return maxCapacity[resource];
         }
@@ -161,8 +185,14 @@ namespace Assets.InGame
                 return parent.As<ResourceStorage>();
             }
         }
-
         public Dictionary<Resource, int> Consuming { get; private set; }
+
+        public Consumer(Building parent, Dictionary<Resource,int> consuming)
+        {
+            this.parent = parent;
+            Consuming = consuming;
+        }
+
         public void Consume()
         {
             if (TryConsume())
@@ -195,6 +225,13 @@ namespace Assets.InGame
             }
         }
         public Dictionary<Resource, int> Producting { get; private set; }
+
+        public Producter(Building parent, Dictionary<Resource,int> producting)
+        {
+            this.parent = parent;
+            Producting = producting;
+        }
+
         public void Product()
         {
             if (TryProduct())
@@ -220,7 +257,14 @@ namespace Assets.InGame
     public class UseCitizen : BuildingPart
     {
         public int NeedCitizens { get; private set; }
-        public List<Citizen> Citizens { get; private set; }
+        public List<Citizen> Citizens { get; private set; } = new List<Citizen>();
+
+        public UseCitizen(Building parent, int needCitizens)
+        {
+            this.parent = parent;
+            NeedCitizens = needCitizens;
+        }
+
         public bool HaveNeededCount()
         {
             return Citizens.Count >= NeedCitizens;
@@ -229,9 +273,18 @@ namespace Assets.InGame
     public class RestPoint : BuildingPart
     {
         public int MaxCitizenCount { get; private set; }
+        public int RestValue { get; private set; }
         public int CitizenCount { get => Citizens.Count; }
         public List<Citizen> Citizens { get; private set; }
-        void Rest()
+
+        public RestPoint(Building parent, int maxCitizensCount,int restValue)
+        {
+            this.parent = parent;
+            MaxCitizenCount = maxCitizensCount;
+            RestValue = restValue;
+        }
+
+        public void Rest()
         {
             //TODO rest
         }
