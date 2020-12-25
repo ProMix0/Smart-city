@@ -6,13 +6,19 @@ using UnityEngine;
 public class Control : MonoBehaviour
 {
 
-    public Sprite startBlock;
-    public Sprite midBlock;
-    public Sprite endBlock;
+    public Material startBlock;
+    public Material midBlock;
+    public Material endBlock;
 
     private int completeLevels = 0;
 
-    public void Start() { }
+    public void Start()
+    {
+        CompleteLevel();
+    }
+    void Update(){
+    }
+
 
         private IEnumerator OnGeneratingRoutine()
         {
@@ -22,15 +28,15 @@ public class Control : MonoBehaviour
             GameObject newBlock = new GameObject("Start block");
             newBlock.transform.position = position;
             newBlock.transform.localScale = size;
-            SpriteRenderer renderer = newBlock.AddComponent<SpriteRenderer>();
-            renderer.sprite = this.startBlock;
+            MeshRenderer renderer = newBlock.AddComponent<MeshRenderer>();
+            renderer.material = this.startBlock;
 
             int count = this.completeLevels + 5;
             for (int i = 0; i < count; i++)
             {
                 newBlock = new GameObject("Middle block");
-                renderer = newBlock.AddComponent<SpriteRenderer>();
-                renderer.sprite = this.midBlock;
+                renderer = newBlock.AddComponent<MeshRenderer>();
+                renderer.material = this.midBlock;
 
                 newBlock.transform.localScale = size;
                 position.x += size.x;
@@ -49,4 +55,5 @@ public class Control : MonoBehaviour
             StartCoroutine(OnGeneratingRoutine());
         }
 
-    }
+    
+}
