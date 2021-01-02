@@ -58,6 +58,7 @@
      <Compile Include="Assets\Scripts\BaseClasses.cs" />
      <Compile Include="Assets\Scripts\Control.cs" />
      <Compile Include="Assets\Scripts\ModelCreating.cs" />
+     <Compile Include="Assets\Scripts\Resources.cs" />
  <Reference Include="UnityEngine">
  <HintPath>C:/Program Files/Editor/2019.4.16f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
  </Reference>
