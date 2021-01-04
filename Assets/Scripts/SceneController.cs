@@ -6,7 +6,7 @@ public class SceneController : MonoBehaviour
 {
     public void MenuOnClick()
     {
-        //Pause game
+        Time.timeScale = 0;
         //Open in-game menu
     }
 
