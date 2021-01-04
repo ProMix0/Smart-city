@@ -12,7 +12,7 @@ namespace Game
         public Building(string path, City city)
         {
             cityParent = city;
-            model = Instantiate(Resources.Load(path, typeof(GameObject))) as GameObject;
+            model = Instantiate(UnityEngine.Resources.Load(path, typeof(GameObject))) as GameObject;
         }
         public void SetCoordinates(int x, int y, int z)
         {
