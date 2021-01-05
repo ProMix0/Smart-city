@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -58,6 +59,15 @@ namespace Game
                     item.Satisfaction[keyValuePair.Key] = false;
             foreach (var item in SatisfactionBuildings)
                 item.UpdateSatisfaction();
+        }
+
+        public static Tuple<int,int> GetMouseIndex()
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Plane plane = new Plane(Vector3.up, Vector3.zero);
+            plane.Raycast(ray, out float distance);
+            Vector3 point = ray.GetPoint(distance);
+            return new Tuple<int, int>((int)(point.x/25+50), (int)(point.y / 25 + 50));
         }
 
         public enum GameStage

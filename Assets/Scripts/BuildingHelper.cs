@@ -8,28 +8,26 @@ namespace Game
     {
         private CellState[,] matrix;
         private City city;
+        private Building building;
 
-        public BuildingHelper(bool[,] matrix, int centerX, int centerY, City city)
+        public BuildingHelper(Building toBuild, City city)
         {
-            if (centerX < 0 || centerX >= matrix.GetLength(0)) throw new ArgumentOutOfRangeException();
-            if (centerY < 0 || centerY >= matrix.GetLength(1)) throw new ArgumentOutOfRangeException();
-            this.city = city;
-            this.matrix = new CellState[matrix.GetLength(0), matrix.GetLength(1)];
-            for (int i = 0; i < matrix.GetLength(0); i++)
-                for (int j = 0; j < matrix.GetLength(1); j++)
-                    this.matrix[i, j] = matrix[i, j] ? CellState.Fill : CellState.Empty;
-            this.matrix[centerX, centerY] = CellState.Center;
+            matrix = toBuild.GridProjection.matrix;
+            building = toBuild;
         }
 
-        private Tuple<int,int> CenterIndexes()
+        public Tuple<int,int> CenterIndexes()
         {
             for (int i = 0; i < matrix.GetLength(0); i++)
                 for (int j = 0; j < matrix.GetLength(1); j++)
                     if (matrix[i, j] == CellState.Center) return new Tuple<int, int>(i, j);
             throw new InvalidOperationException();
         }
-        private bool CanBuild(int x, int y)
+        private bool CanBuild()
         {
+            var position = City.GetMouseIndex();
+            int x = position.Item1;
+            int y = position.Item2;
             var center = CenterIndexes();
             if (x - center.Item1 < 0 ||
                 y - center.Item2 < 0 ||
@@ -54,8 +52,21 @@ namespace Game
 
         public void Build()
         {
-            //Get cursor grid position
-            //Build by position
+            if (CanBuild())
+            {
+                //Get cursor grid position
+                var index = City.GetMouseIndex();
+                //Build by position
+                var position = City.GetMouseIndex();
+                int x = position.Item1;
+                int y = position.Item2;
+                var center = CenterIndexes();
+                for (int i = x - center.Item1; i < x - center.Item1 + matrix.GetLength(0); i++)
+                    for (int j = y - center.Item2; j < y - center.Item2 + matrix.GetLength(1); j++)
+                        if (matrix[i - x + center.Item1, j - y + center.Item2] != CellState.Empty) city.Grid[i, j] = building;
+
+                building.Build("",city);
+            }
         }
 
         public void FixedUpdate()
@@ -66,7 +77,7 @@ namespace Game
             //Change color of build zone
         }
 
-        private enum CellState
+        public enum CellState
         { Empty,Fill,Center}
     }
 }
