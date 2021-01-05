@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Game
 {
-    public class Building:MonoBehaviour
+    public class Building : MonoBehaviour
     {
         internal GameObject model;
         internal City cityParent;
@@ -27,12 +27,12 @@ namespace Game
         { { "Shop", false },{"ScienceCenter",false },{ "Park", false },{"CarPark",false } };
         public Home(string path, City city) : base(path, city)
         {
-            for (int i = 0; i < 3 && city.FreeCitizens.Count>0; i++)
+            for (int i = 0; i < 3 && city.FreeCitizens.Count > 0; i++)
                 Citizens.Add(city.FreeCitizens.Dequeue());
         }
         public void AddCitizen(Citizen citizen)
         {
-            foreach(var item in Satisfaction)
+            foreach (var item in Satisfaction)
                 citizen.Satisfaction[item.Key] = item.Value;
         }
         public void RemoveCitizen(Citizen citizen)
