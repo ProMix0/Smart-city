@@ -64,11 +64,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\InGameMenuController.cs" />
+    <Compile Include="Assets\Scripts\Controller.cs" />
     <Compile Include="Assets\Scripts\MenuView.cs" />
     <Compile Include="Assets\Scripts\Resources.cs" />
-    <Compile Include="Assets\Scripts\SceneController.cs" />
-    <Compile Include="Assets\Scripts\ViewSW.cs" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
