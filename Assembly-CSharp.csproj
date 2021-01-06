@@ -64,9 +64,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Building.cs" />
-    <Compile Include="Assets\Scripts\City.cs" />
-    <Compile Include="Assets\Scripts\ModelCreating.cs" />
     <Compile Include="Assets\Scripts\Resources.cs" />
     <Compile Include="Assets\Scripts\SceneController.cs" />
     <Reference Include="UnityEngine">
