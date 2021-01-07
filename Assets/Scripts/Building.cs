@@ -67,7 +67,7 @@ namespace Game
 
         public override void Build(string path, City city, Tuple<int, int> indexes)
         {
-            base.Build("Home", city, indexes);
+            base.Build("Home/Home", city, indexes);
             for (int i = 0; i < 3 && city.FreeCitizens.Count > 0; i++)
                 Citizens.Add(city.FreeCitizens.Dequeue());
         }
@@ -161,10 +161,10 @@ namespace Game
 
         public override void Build(string path, City city, Tuple<int, int> indexes)
         {
-            base.Build("CarPark", city, indexes);
+            base.Build("CarPark/CarPark", city, indexes);
             Model.transform.position = new Vector3(
-                (indexes.Item1 - City.GridSideSize / 2) * City.CellSizeAsCoordinates + City.CellSizeAsCoordinates / 2, 0,
-                (indexes.Item2 - City.GridSideSize / 2)*City.CellSizeAsCoordinates + City.CellSizeAsCoordinates / 2);
+                (City.GridSideSize / 2 - indexes.Item1) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates / 2, 0,
+                (City.GridSideSize / 2 - indexes.Item2) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates / 2);
         }
     }
 }

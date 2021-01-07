@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 using UnityEngine;
 
 namespace Game
@@ -8,6 +9,7 @@ namespace Game
     public class City : MonoBehaviour
     {
         public const int GridSideSize = 100, CellSizeAsCoordinates = 10;
+        private GameObject city;
 
         public Building[,] Grid { get; private set; } = new Building[GridSideSize, GridSideSize];
         public int Radius { get;private set; }
@@ -56,7 +58,8 @@ namespace Game
 
         public void Start()
         {
-            int yCoordinate = 0, xCoordinate = GridSideSize * CellSizeAsCoordinates / 2, zCoordinate = xCoordinate;
+            city = GameObject.Find("City");
+            float yCoordinate = -0.5f, xCoordinate = GridSideSize * CellSizeAsCoordinates / 2, zCoordinate = xCoordinate;
             List<Vector3> lines = new List<Vector3> { new Vector3(xCoordinate, yCoordinate, -zCoordinate),
                 new Vector3(xCoordinate, yCoordinate, zCoordinate) };
             while (xCoordinate > -GridSideSize * CellSizeAsCoordinates / 2)
@@ -81,7 +84,7 @@ namespace Game
             lineRenderer.SetPositions(lines.ToArray());
 
 
-            
+            city.AddComponent<CarPark>().Build("", this, new Tuple<int, int>(50, 50));
         }
 
         public void OnBuildBuilding(Building building)
@@ -101,6 +104,12 @@ namespace Game
             Vector3 point = ray.GetPoint(distance);
             return new Tuple<int, int>((int)(point.x / CellSizeAsCoordinates + GridSideSize / 2), 
                 (int)(point.y / CellSizeAsCoordinates + GridSideSize / 2));
+        }
+
+        public void ProceduralGenerating(string seed)
+        {
+            System.Random random = new System.Random(seed.GetHashCode());
+
         }
 
         public enum GameStage
