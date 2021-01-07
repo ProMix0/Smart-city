@@ -7,7 +7,7 @@ namespace Game
 {
     public class City : MonoBehaviour
     {
-        public const int GridSideSize = 100, CellSizeAsCoordinates = 50;
+        public const int GridSideSize = 100, CellSizeAsCoordinates = 10;
 
         public Building[,] Grid { get; private set; } = new Building[GridSideSize, GridSideSize];
         public int Radius { get;private set; }
@@ -80,6 +80,8 @@ namespace Game
             lineRenderer.positionCount = lines.Count;
             lineRenderer.SetPositions(lines.ToArray());
 
+
+            
         }
 
         public void OnBuildBuilding(Building building)

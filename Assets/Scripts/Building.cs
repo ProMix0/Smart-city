@@ -8,17 +8,17 @@ namespace Game
 {
     public class Building : MonoBehaviour
     {
-        internal GameObject model;
+        public GameObject Model { get; internal set; }
         internal City cityParent;
         public Projection GridProjection { get; internal set; }
 
         public Building()
         {}
 
-        public virtual void Build(string path, City city)
+        public virtual void Build(string path, City city, Tuple<int,int> indexes)
         {
             cityParent = city;
-            model = Instantiate(Resources.Load(path, typeof(GameObject))) as GameObject;
+            Model = Instantiate(Resources.Load(path, typeof(GameObject))) as GameObject;
         }
 
         public class Projection
@@ -65,9 +65,9 @@ namespace Game
             {CellState.Fill,CellState.Center }});
         }
 
-        public override void Build(string path, City city)
+        public override void Build(string path, City city, Tuple<int, int> indexes)
         {
-            base.Build(path, city);
+            base.Build("Home", city, indexes);
             for (int i = 0; i < 3 && city.FreeCitizens.Count > 0; i++)
                 Citizens.Add(city.FreeCitizens.Dequeue());
         }
@@ -109,9 +109,9 @@ namespace Game
                 {CellState.Fill,CellState.Empty,CellState.Fill }});
         }
 
-        public override void Build(string path,City city)
+        public override void Build(string path,City city, Tuple<int, int> indexes)
         {
-            base.Build("Shop", city);
+            base.Build("Shop", city, indexes);
         }
     }
     public class ScienceCenter : SatisfactionBuilding
@@ -126,9 +126,9 @@ namespace Game
                 {CellState.Fill,CellState.Fill,CellState.Empty }});
         }
 
-        public override void Build(string path, City city)
+        public override void Build(string path, City city, Tuple<int, int> indexes)
         {
-            base.Build("ScienceCenter", city);
+            base.Build("ScienceCenter", city, indexes);
         }
     }
     public class Park : SatisfactionBuilding
@@ -142,9 +142,9 @@ namespace Game
                 {CellState.Fill,CellState.Fill,CellState.Fill,CellState.Fill } });
         }
 
-        public override void Build(string path, City city)
+        public override void Build(string path, City city, Tuple<int, int> indexes)
         {
-            base.Build("Park", city);
+            base.Build("Park", city, indexes);
         }
     }
     public class CarPark : SatisfactionBuilding
@@ -159,9 +159,12 @@ namespace Game
                 {CellState.Fill,CellState.Fill,CellState.Fill }});
         }
 
-        public override void Build(string path, City city)
+        public override void Build(string path, City city, Tuple<int, int> indexes)
         {
-            base.Build("CarPark", city);
+            base.Build("CarPark", city, indexes);
+            Model.transform.position = new Vector3(
+                (indexes.Item1 - City.GridSideSize / 2) * City.CellSizeAsCoordinates + City.CellSizeAsCoordinates / 2, 0,
+                (indexes.Item2 - City.GridSideSize / 2)*City.CellSizeAsCoordinates + City.CellSizeAsCoordinates / 2);
         }
     }
 }

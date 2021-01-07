@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Game
@@ -10,7 +11,7 @@ namespace Game
         private City city;
         private Building building;
 
-        public BuildingHelper(Building toBuild, City city)
+        public void New(Building toBuild, City city)
         {
             matrix = toBuild.GridProjection.matrix;
             building = toBuild;
@@ -55,9 +56,8 @@ namespace Game
             if (CanBuild())
             {
                 //Get cursor grid position
-                var index = City.GetMouseIndex();
-                //Build by position
                 var position = City.GetMouseIndex();
+                //Build by position
                 int x = position.Item1;
                 int y = position.Item2;
                 var center = CenterIndexes();
@@ -65,14 +65,29 @@ namespace Game
                     for (int j = y - center.Item2; j < y - center.Item2 + matrix.GetLength(1); j++)
                         if (matrix[i - x + center.Item1, j - y + center.Item2] != CellState.Empty) city.Grid[i, j] = building;
 
-                building.Build("",city);
+                building.Build("",city, center );
+                Destroy(this);
             }
         }
 
+        private List<GameObject> oldBuildZone = new List<GameObject>();
         public void FixedUpdate()
         {
+            foreach (var item in oldBuildZone)
+                Destroy(item);
             //Get cursor grid coordinates
+            var position = City.GetMouseIndex();
             //Move build zone
+            int x = position.Item1;
+            int y = position.Item2;
+            var center = CenterIndexes();
+            for (int i = x - center.Item1; i < x - center.Item1 + matrix.GetLength(0); i++)
+                for (int j = y - center.Item2; j < y - center.Item2 + matrix.GetLength(1); j++)
+                {
+                    GameObject gameObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
+                    if (matrix[i - x + center.Item1, j - y + center.Item2] == CellState.Empty)
+                        ;
+                }
             //Check ability to build there
             //Change color of build zone
         }
