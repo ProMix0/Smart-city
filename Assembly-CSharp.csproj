@@ -65,8 +65,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Controller.cs" />
-    <Compile Include="Assets\Scripts\MenuView.cs" />
-    <Compile Include="Assets\Scripts\Resources.cs" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
