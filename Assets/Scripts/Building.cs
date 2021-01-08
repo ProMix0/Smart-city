@@ -14,14 +14,14 @@ namespace Game
         public Projection GridProjection { get; internal set; }
         public Tuple<int, int> center;
 
-        public virtual void Build(string path, City city, IntStruct indexes)
+        public virtual void Build(string path, City city, IntStruct indexes, Building building)
         {
             cityParent = city;
             Model = Instantiate(Resources.Load(path, typeof(GameObject))) as GameObject;
             for (int i = indexes.Item1 - center.Item1; i < indexes.Item1 - center.Item1 + GridProjection.matrix.GetLength(0); i++)
                 for (int j = indexes.Item2 - center.Item2; j < indexes.Item2 - center.Item2 + GridProjection.matrix.GetLength(1); j++)
                     if (GridProjection.matrix[i - indexes.Item1 + center.Item1, j - indexes.Item2 + center.Item2] != CellState.Empty)
-                        cityParent.Grid[i, j] = this;
+                        cityParent.Grid[i, j] = building;
         }
 
         
@@ -66,19 +66,19 @@ namespace Game
         public void Awake()
         {
             GridProjection = new Projection(new CellState[,]
-            { {CellState.Fill,CellState.Center },
-            {CellState.Empty,CellState.Fill }});
-            center = new Tuple<int, int>(0, 1);
+            { {CellState.Fill,CellState.Empty },
+            {CellState.Center,CellState.Fill }});
+            center = new Tuple<int, int>(1, 0);
         }
 
-        public override void Build(string path, City city, IntStruct indexes)
+        public override void Build(string path, City city, IntStruct indexes, Building building)
         {
-            base.Build("Home", city, indexes);
+            base.Build("Home", city, indexes, this);
             for (int i = 0; i < 3 && city.FreeCitizens.Count > 0; i++)
                 Citizens.Add(city.FreeCitizens.Dequeue());
             Model.transform.position = new Vector3(
-                (City.GridSideSize / 2 - indexes.Item1) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates / 2, 0,
-                (City.GridSideSize / 2 - indexes.Item2) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates / 2);
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates + CellSizeAsCoordinates / 2 - 9, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates * 1.5f + 10);
         }
 
         public void AddCitizen(Citizen citizen)
@@ -90,6 +90,24 @@ namespace Game
         {
             foreach (var item in citizen.Satisfaction)
                 citizen.Satisfaction[item.Key] = false;
+        }
+    }
+
+    public class Road : Building
+    {
+        public void Awake()
+        {
+            GridProjection = new Projection(new CellState[,]
+                {{CellState.Center }});
+            center = new Tuple<int, int>(0, 0);
+        }
+
+        public override void Build(string path, City city, IntStruct indexes, Building building)
+        {
+            base.Build("Road", city, indexes, this);
+            Model.transform.position = new Vector3(
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2);
         }
     }
 
@@ -115,34 +133,17 @@ namespace Game
             Radius = 5;
             GridProjection = new Projection(new CellState[,]
                 {{CellState.Fill,CellState.Fill},
-                {CellState.Center,CellState.Empty},
+                {CellState.Empty,CellState.Center},
                 {CellState.Fill,CellState.Fill}});
             center = new Tuple<int, int>(1, 1);
         }
 
-        public override void Build(string path,City city, IntStruct indexes)
+        public override void Build(string path,City city, IntStruct indexes, Building building)
         {
-            base.Build("Shop", city, indexes);
+            base.Build("Shop", city, indexes, building);
             Model.transform.position = new Vector3(
-                (City.GridSideSize / 2 - indexes.Item1) * City.CellSizeAsCoordinates + City.CellSizeAsCoordinates / 2, 0,
-                (City.GridSideSize / 2 - indexes.Item2) * City.CellSizeAsCoordinates + City.CellSizeAsCoordinates / 2);
-        }
-    }
-    public class Road : Building
-    {
-        public void Awake()
-        {
-            GridProjection = new Projection(new CellState[,]
-                {{CellState.Center }});
-            center = new Tuple<int, int>(0, 0);
-        }
-
-        public override void Build(string path, City city, IntStruct indexes)
-        {
-            base.Build("Road", city, indexes);
-            Model.transform.position = new Vector3(
-                (City.GridSideSize / 2 - indexes.Item1) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates / 2, 0,
-                (City.GridSideSize / 2 - indexes.Item2) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates / 2);
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2);
         }
     }
     public class ScienceCenter : SatisfactionBuilding
@@ -158,12 +159,12 @@ namespace Game
             center = new Tuple<int, int>(1, 1);
         }
 
-        public override void Build(string path, City city, IntStruct indexes)
+        public override void Build(string path, City city, IntStruct indexes, Building building)
         {
-            base.Build("ScienceCenter", city, indexes);
+            base.Build("ScienceCenter", city, indexes, this);
             Model.transform.position = new Vector3(
-                (City.GridSideSize / 2 - indexes.Item1) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates / 2, 0,
-                (City.GridSideSize / 2 - indexes.Item2) * City.CellSizeAsCoordinates + City.CellSizeAsCoordinates / 2);
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2+1, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2+7.5f);
         }
     }
     public class Park : SatisfactionBuilding
@@ -173,17 +174,19 @@ namespace Game
             satisfactionName = "Park";
             Radius = 13;
             GridProjection = new Projection(new CellState[,]
-                {{CellState.Fill,CellState.Fill,CellState.Fill,CellState.Fill},
-                {CellState.Fill,CellState.Fill,CellState.Fill,CellState.Fill } });
+                {{CellState.Center,CellState.Fill},
+                {CellState.Fill,CellState.Fill},
+                {CellState.Fill,CellState.Fill} ,
+                {CellState.Fill,CellState.Fill}});
             center = new Tuple<int, int>(0, 0);
         }
 
-        public override void Build(string path, City city, IntStruct indexes)
+        public override void Build(string path, City city, IntStruct indexes, Building building)
         {
-            base.Build("Park", city, indexes);
+            base.Build("Park", city, indexes, this);
             Model.transform.position = new Vector3(
-                (City.GridSideSize / 2 - indexes.Item1) * City.CellSizeAsCoordinates-2*City.CellSizeAsCoordinates, 0,
-                (City.GridSideSize / 2 - indexes.Item2) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates);
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates -2*CellSizeAsCoordinates, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates);
         }
     }
     public class CarPark : SatisfactionBuilding
@@ -199,12 +202,12 @@ namespace Game
             center = new Tuple<int, int>(1, 1);
         }
 
-        public override void Build(string path, City city, IntStruct indexes)
+        public override void Build(string path, City city, IntStruct indexes, Building building)
         {
-            base.Build("CarPark/CarPark", city, indexes);
+            base.Build("CarPark/CarPark", city, indexes, this);
             Model.transform.position = new Vector3(
-                (City.GridSideSize / 2 - indexes.Item1) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates / 2, 0,
-                (City.GridSideSize / 2 - indexes.Item2) * City.CellSizeAsCoordinates - City.CellSizeAsCoordinates / 2);
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 namespace Game
 {
@@ -86,7 +87,14 @@ namespace Game
             lineRenderer.SetPositions(lines.ToArray());
 
 
-            //city.AddComponent<Road>().Build("", this, new Tuple<int, int>(1, 1));
+            //city.AddComponent<Park>().Build("", this, new IntStruct(0, 0), null);
+
+            //var test = city.AddComponent<Home>();
+            //if (CanBuild(new IntStruct(1, 0), test)) test.Build("", this, new IntStruct(1, 0), null);
+
+
+
+
             ProceduralGenerating(DateTime.Now.ToString());
         }
 
@@ -143,9 +151,10 @@ namespace Game
 
             System.Random random = new System.Random(seed.GetHashCode());
             int spaceCounter = 0;
-            for(int i=0;i< GridSideSize - 5;i++,spaceCounter++)
+            List<int> xSpaces = new List<int>();
+            for(int i=0;i< GridSideSize - 3;i++,spaceCounter++)
             {
-                if(spaceCounter +random.Next(8)>10)
+                if(spaceCounter +random.Next(8)>10+random.Next(3))
                 {
                     for(int j=0; j<=GridSideSize;j++)
                     {
@@ -153,15 +162,18 @@ namespace Game
                         Buildings.Add(road);
                         IntStruct tuple = new IntStruct(i, j);
                         if (CanBuild(tuple, road))
-                            road.Build("", this, tuple);
+                            road.Build("", this, tuple,null);
                     }
+                    xSpaces.Add(spaceCounter);
                     spaceCounter = -1;
                 }
             }
+            xSpaces.Add(spaceCounter+2);
             spaceCounter = 0;
-            for (int i = 3; i < GridSideSize - 5; i++, spaceCounter++)
+            List<int> zSpaces = new List<int>();
+            for (int i = 0; i < GridSideSize - 3; i++, spaceCounter++)
             {
-                if (spaceCounter + random.Next(5) > 10)
+                if (spaceCounter + random.Next(7) > 10 + random.Next(3))
                 {
                     for (int j = 0; j <= GridSideSize; j++)
                     {
@@ -169,13 +181,82 @@ namespace Game
                         Buildings.Add(road);
                         IntStruct tuple = new IntStruct(j, i);
                         if (CanBuild(tuple,road))
-                            road.Build("", this, tuple);
+                            road.Build("", this, tuple,null);
                     }
+                    zSpaces.Add(spaceCounter);
                     spaceCounter = -1;
                 }
             }
+            zSpaces.Add(spaceCounter+2);
 
-            Debug.Log($"Generating: {(DateTime.Now - milli).TotalMilliseconds}");
+            Debug.Log($"Generating roads: {(DateTime.Now - milli).TotalMilliseconds}");
+
+            List<IntStruct[,]> districts = new List<IntStruct[,]>();
+            int xSum=0, zSum=0;
+            for (int x = 0; x < xSpaces.Count; x++)
+            {
+                for (int z = 0; z < zSpaces.Count; z++)
+                {
+                    IntStruct[,] district = new IntStruct[xSpaces[x], zSpaces[z]];
+                    for (int i = 0; i < xSpaces[x]; i++)
+                        for (int j = 0; j < zSpaces[z]; j++)
+                            district[i, j] = new IntStruct(i + xSum + x, j + zSum + z);
+                    zSum += zSpaces[z];
+                    districts.Add(district);
+                }
+                zSum = 0;
+                xSum += xSpaces[x];
+            }
+
+            foreach(var district in districts.OrderBy(a=>random.Next()))
+            {
+                Building component = GetRandomComponent(random);
+                Buildings.Add(component);
+                foreach(var indexes in district.AsIEnumerable().OrderBy(a => random.Next()))
+                    if(CanBuild(indexes,component))
+                    {
+                        component.Build("", this, indexes, null);
+                        break;
+                    }
+            }
+
+
+            int counter = 0;
+            Home home = city.AddComponent<Home>();
+            Buildings.Add(home);
+            do
+            {
+                var index = new IntStruct(random.Next(GridSideSize), random.Next(GridSideSize));
+                if(CanBuild(index,home))
+                {
+                    home.Build("", this, index, null);
+                    home = city.AddComponent<Home>();
+                    Buildings.Add(home);
+                }
+                counter++;
+            }
+            while (counter + random.Next(GridSideSize / 2) < GridSideSize*2);
+        }
+
+        private Building GetRandomComponent(System.Random random)
+        {
+            Building result=null;
+            switch(random.Next(4))
+            {
+                case 0:
+                    result = city.AddComponent<Shop>();
+                    break;
+                case 1:
+                    result = city.AddComponent<ScienceCenter>();
+                    break;
+                case 2:
+                    result = city.AddComponent<Park>();
+                    break;
+                case 3:
+                    result = city.AddComponent<CarPark>();
+                    break;
+            }
+            return result;
         }
 
         public void OnGenerateClick()
@@ -195,5 +276,14 @@ namespace Game
         }
         public enum GameStage
         { First, Second, Thrid }
+    }
+
+    public static class Extensionmethods
+    {
+        public static IEnumerable<T> AsIEnumerable<T>(this T[,] matrix)
+        {
+            foreach (var item in matrix)
+                yield return item;
+        }
     }
 }
