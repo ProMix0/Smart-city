@@ -69,6 +69,7 @@
     <Compile Include="Assets\Scripts\Citizen.cs" />
     <Compile Include="Assets\Scripts\City.cs" />
     <Compile Include="Assets\Scripts\Controller.cs" />
+    <Compile Include="Assets\Scripts\MainMenuController.cs" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Following Characters.txt" />
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
