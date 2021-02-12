@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: c9e27ec8d83a503479dea13a5804744c
+guid: a5e2d0a404c1ddc41957f698ce33f8af
 ModelImporter:
   serializedVersion: 19301
   internalIDToNameTable: []
@@ -7,18 +7,8 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Base
-    second: {fileID: 2100000, guid: f8a63d0a24b7ac34e860ccfd8f008402, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Deco
-    second: {fileID: 2100000, guid: 1172b8b9ea660e74383fb5c18e6c9652, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: Material.001
-    second: {fileID: 2100000, guid: fdde4843e90e1fd439fae2a262bf9da6, type: 2}
+      name: No Name
+    second: {fileID: 2100000, guid: 5d59f0b2ba575954e89e4aea64e5e22e, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
