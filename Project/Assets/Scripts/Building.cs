@@ -18,10 +18,17 @@ namespace Game
         {
             cityParent = city;
             Model = Instantiate(Resources.Load(path, typeof(GameObject))) as GameObject;
-            for (int i = indexes.Item1 - center.Item1; i < indexes.Item1 - center.Item1 + GridProjection.matrix.GetLength(0); i++)
-                for (int j = indexes.Item2 - center.Item2; j < indexes.Item2 - center.Item2 + GridProjection.matrix.GetLength(1); j++)
-                    if (GridProjection.matrix[i - indexes.Item1 + center.Item1, j - indexes.Item2 + center.Item2] != CellState.Empty)
-                        cityParent.Grid[i, j] = building;
+            try
+            {
+                for (int i = indexes.Item1 - center.Item1; i < indexes.Item1 - center.Item1 + GridProjection.matrix.GetLength(0); i++)
+                    for (int j = indexes.Item2 - center.Item2; j < indexes.Item2 - center.Item2 + GridProjection.matrix.GetLength(1); j++)
+                        if (GridProjection.matrix[i - indexes.Item1 + center.Item1, j - indexes.Item2 + center.Item2] != CellState.Empty)
+                            cityParent.Grid[i, j] = building;
+            }
+            catch (IndexOutOfRangeException ex)
+            {
+                Debug.Log("IndexOutOfRangeException in Build()");
+            }
         }
 
         
@@ -77,8 +84,8 @@ namespace Game
             for (int i = 0; i < 3 && city.FreeCitizens.Count > 0; i++)
                 Citizens.Add(city.FreeCitizens.Dequeue());
             Model.transform.position = new Vector3(
-                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates + CellSizeAsCoordinates / 2 - 9, 0,
-                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates * 1.5f + 10);
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates + CellSizeAsCoordinates / 2 - 6, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates * 1.5f + 9);
         }
 
         public void AddCitizen(Citizen citizen)
@@ -105,6 +112,24 @@ namespace Game
         public override void Build(string path, City city, IntStruct indexes, Building building)
         {
             base.Build("Road", city, indexes, this);
+            Model.transform.position = new Vector3(
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2);
+        }
+    }
+
+    public class Sidewalk : Building
+    {
+        public void Awake()
+        {
+            GridProjection = new Projection(new CellState[,]
+                {{CellState.Center }});
+            center = new Tuple<int, int>(0, 0);
+        }
+
+        public override void Build(string path, City city, IntStruct indexes, Building building)
+        {
+            base.Build("Sidewalk", city, indexes, this);
             Model.transform.position = new Vector3(
                 (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2, 0,
                 (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2);

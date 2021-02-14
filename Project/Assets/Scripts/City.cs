@@ -87,15 +87,16 @@ namespace Game
             lineRenderer.SetPositions(lines.ToArray());
 
 
-            //city.AddComponent<Park>().Build("", this, new IntStruct(0, 0), null);
+            //city.AddComponent<Home>().Build("", this, new IntStruct(0, 0), null);
 
-            //var test = city.AddComponent<Home>();
-            //if (CanBuild(new IntStruct(1, 0), test)) test.Build("", this, new IntStruct(1, 0), null);
+            var test = city.AddComponent<Sidewalk>();
+            IntStruct coords = new IntStruct(0, 0);
+            if (true||CanBuild(coords, test)) test.Build("", this,coords, null);
 
 
 
 
-            ProceduralGenerating(DateTime.Now.ToString());
+            //ProceduralGenerating(DateTime.Now.ToString());
         }
 
         public void OnBuildBuilding(Building building)
