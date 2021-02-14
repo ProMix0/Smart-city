@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 0cee6fa2f10dca54e9cbf61c10bac241
+guid: 4319e26b50381a14eb2e9251117d46b6
 ModelImporter:
   serializedVersion: 19301
   internalIDToNameTable: []
@@ -7,18 +7,18 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Base.001
-    second: {fileID: 2100000, guid: 8b35a6d4120a0c24f9231caa8c5e9f8f, type: 2}
+      name: Base.002
+    second: {fileID: 2100000, guid: ad392b8acd4650742a453274e8127320, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Deco.001
-    second: {fileID: 2100000, guid: 93e697b179ca12642bffff30e4700260, type: 2}
+      name: Main
+    second: {fileID: 2100000, guid: 910e44d851392c24a959424bb4a78d56, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
-      name: Doors.002
-    second: {fileID: 2100000, guid: 92c9a07c79069f549be6308b86d32224, type: 2}
+      name: Right_And_Left
+    second: {fileID: 2100000, guid: dd9f0a5241f33b74d8b3d4328e2e400c, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
