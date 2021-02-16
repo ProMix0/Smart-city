@@ -3,3 +3,4 @@ Project/*
 .vs/*
 !Project/Assets/
 !Project/ProjectSettings/
+*.meta
