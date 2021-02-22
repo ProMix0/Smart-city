@@ -17,7 +17,7 @@ namespace Game
         public virtual void Build(string path, City city, IntStruct indexes, Building building)
         {
             cityParent = city;
-            Model = Instantiate(Resources.Load(path, typeof(GameObject))) as GameObject;
+                Model = Instantiate(Resources.Load($"Ingame models\\{path}\\{path}", typeof(GameObject))) as GameObject;
             try
             {
                 for (int i = indexes.Item1 - center.Item1; i < indexes.Item1 - center.Item1 + GridProjection.matrix.GetLength(0); i++)
@@ -25,7 +25,7 @@ namespace Game
                         if (GridProjection.matrix[i - indexes.Item1 + center.Item1, j - indexes.Item2 + center.Item2] != CellState.Empty)
                             cityParent.Grid[i, j] = building;
             }
-            catch (IndexOutOfRangeException ex)
+            catch (Exception ex)
             {
                 Debug.Log("IndexOutOfRangeException in Build()");
             }
@@ -84,8 +84,8 @@ namespace Game
             for (int i = 0; i < 3 && city.FreeCitizens.Count > 0; i++)
                 Citizens.Add(city.FreeCitizens.Dequeue());
             Model.transform.position = new Vector3(
-                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates + CellSizeAsCoordinates / 2 - 6, 0,
-                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates * 1.5f + 9);
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates + CellSizeAsCoordinates / 2 - 7, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates * 1.5f + 4);
         }
 
         public void AddCitizen(Citizen citizen)
@@ -167,8 +167,8 @@ namespace Game
         {
             base.Build("Shop", city, indexes, building);
             Model.transform.position = new Vector3(
-                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2, 0,
-                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2);
+                (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2+6, 0,
+                (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2+9);
         }
     }
     public class ScienceCenter : SatisfactionBuilding
@@ -229,7 +229,7 @@ namespace Game
 
         public override void Build(string path, City city, IntStruct indexes, Building building)
         {
-            base.Build("CarPark/CarPark", city, indexes, this);
+            base.Build("CarPark", city, indexes, this);
             Model.transform.position = new Vector3(
                 (GridSideSize / 2 - indexes.Item1) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2, 0,
                 (GridSideSize / 2 - indexes.Item2) * CellSizeAsCoordinates - CellSizeAsCoordinates / 2);

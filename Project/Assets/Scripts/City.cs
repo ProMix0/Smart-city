@@ -84,19 +84,21 @@ namespace Game
             visualGrid.name = "Grid";
             LineRenderer lineRenderer= visualGrid.AddComponent<LineRenderer>();
             lineRenderer.positionCount = lines.Count;
+            lineRenderer.startWidth = 0.1f;
+            lineRenderer.endWidth = 0.1f;
             lineRenderer.SetPositions(lines.ToArray());
 
 
             //city.AddComponent<Home>().Build("", this, new IntStruct(0, 0), null);
 
-            var test = city.AddComponent<Sidewalk>();
-            IntStruct coords = new IntStruct(0, 0);
-            if (true||CanBuild(coords, test)) test.Build("", this,coords, null);
+            //var test = city.AddComponent<Home>();
+            //IntStruct coords = new IntStruct(1, 1);
+            //if (true || CanBuild(coords, test)) test.Build("", this, coords, null);
 
 
 
 
-            //ProceduralGenerating(DateTime.Now.ToString());
+            ProceduralGenerating(DateTime.Now.ToString());
         }
 
         public void OnBuildBuilding(Building building)
@@ -189,6 +191,22 @@ namespace Game
                 }
             }
             zSpaces.Add(spaceCounter+2);
+
+            for(int i =0;i<Grid.GetLength(0);i++)
+                for (int j = 0; j < Grid.GetLength(1); j++)
+                {
+                    if(i==0||Grid[i-1,j]is Road
+                        ||i+1== Grid.GetLength(0)||Grid[i+1,j]is Road
+                        || j == 0 || Grid[i, j-1] is Road
+                        || j + 1 == Grid.GetLength(1) || Grid[i , j+1] is Road)
+                    {
+                        Sidewalk sidewalk= city.AddComponent<Sidewalk>();
+                        Buildings.Add(sidewalk);
+                        IntStruct tuple = new IntStruct(i, j);
+                        if (CanBuild(tuple, sidewalk))
+                            sidewalk.Build("", this, tuple, null);
+                    }
+                }
 
             Debug.Log($"Generating roads: {(DateTime.Now - milli).TotalMilliseconds}");
 
