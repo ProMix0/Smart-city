@@ -142,7 +142,7 @@ namespace Game
 
             foreach (var item in Buildings)
             {
-                Destroy(item.Model);
+                Destroy(item.model);
                 Destroy(item);
             }
             Grid = new Building[GridSideSize, GridSideSize];
