@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Game;
+using System;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts
@@ -11,25 +13,18 @@ namespace Assets.Scripts
         public Vector3 Destination { get; private set; }
         private Transform objectTransform;
 
-        //Ивент для получения новой точки
-        event NewDestinationHandler OnDestinationPoint;
-        delegate Vector3 NewDestinationHandler(GameObject gameObject);
+        public PathController pathController;
 
         void Start()
         {
             objectTransform = GetComponent<Transform>();
         }
 
-        private void Awake()
-        {
-            
-        }
-
         void FixedUpdate()
         {
             //Получить новую точку при достижении текущей
             if (Destination == objectTransform.position)
-                Destination= (Vector3)(OnDestinationPoint?.Invoke(gameObject));
+                Destination = pathController.GetNextPoint(gameObject);
 
             //Рассчёт расстояния до точки и расстояния, которое должно быть пройдено с текущей скоростью
             Vector3 distance = Destination - transform.position;
@@ -39,6 +34,31 @@ namespace Assets.Scripts
             Vector3 finalMovement = path.magnitude < distance.magnitude ? path : distance;
 
             objectTransform.Translate(finalMovement);
+        }
+
+        public abstract class PathController
+        {
+            public abstract Vector3 GetNextPoint(GameObject gameObject);
+        }
+    }
+
+    public class RobotPathController : AutoMover.PathController
+    {
+        private Graph<Sidewalk>.Node<Sidewalk >current, previous;
+
+        public RobotPathController(Graph<Sidewalk>.Node<Sidewalk> entry)
+        {
+            current = entry;
+        }
+
+        public override Vector3 GetNextPoint(GameObject gameObject)
+        {
+            System.Random random = new System.Random();
+            Graph<Sidewalk>.Node<Sidewalk> newWayPoint= current.Edges.Select(edge => edge.Node1 == current ? edge.Node2 : edge.Node1)
+                .Where(node => node != previous).OrderBy(node => random.Next()).First();
+            previous = current;
+            current = newWayPoint;
+            return current.Item.transform.position;
         }
     }
 }

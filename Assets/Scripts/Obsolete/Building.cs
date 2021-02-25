@@ -13,6 +13,7 @@ namespace Game
         internal City cityParent;
         public Projection GridProjection { get; internal set; }
         public Tuple<int, int> center;
+        public readonly int xIndex, yIndex;
 
         public virtual void Build(string path, City city, IntStruct indexes, Building building)
         {

@@ -14,7 +14,7 @@ namespace Game
         private GameObject city;
 
         public Building[,] Grid { get; private set; } = new Building[GridSideSize, GridSideSize];
-        public int Radius { get;private set; }
+        public int Radius { get; private set; }
         public List<Building> Buildings { get; private set; } = new List<Building>();
         public List<Home> Homes { get; } = new List<Home>();
         public List<SatisfactionBuilding> SatisfactionBuildings { get; } = new List<SatisfactionBuilding>();
@@ -29,11 +29,11 @@ namespace Game
             {
                 double current = 0;
                 double max = 0;
-                switch(Stage)
+                switch (Stage)
                 {
                     case GameStage.Thrid:
                         max += 3;
-                        foreach(var item in Citizens)
+                        foreach (var item in Citizens)
                         {
                             if (item.Satisfaction["ScienceCenter"]) current++;
                             if (item.Satisfaction["Park"]) current++;
@@ -80,9 +80,11 @@ namespace Game
                 xCoordinate = -xCoordinate;
                 lines.Add(new Vector3(xCoordinate, yCoordinate, zCoordinate));
             }
-            GameObject visualGrid = new GameObject();
-            visualGrid.name = "Grid";
-            LineRenderer lineRenderer= visualGrid.AddComponent<LineRenderer>();
+            GameObject visualGrid = new GameObject
+            {
+                name = "Grid"
+            };
+            LineRenderer lineRenderer = visualGrid.AddComponent<LineRenderer>();
             lineRenderer.positionCount = lines.Count;
             lineRenderer.startWidth = 0.1f;
             lineRenderer.endWidth = 0.1f;
@@ -110,24 +112,34 @@ namespace Game
                 item.UpdateSatisfaction();
         }
 
-        public static Tuple<int,int> GetMouseIndex()
+        public static Tuple<int, int> GetMouseIndex()
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             Plane plane = new Plane(Vector3.up, Vector3.zero);
             plane.Raycast(ray, out float distance);
             Vector3 point = ray.GetPoint(distance);
-            return new Tuple<int, int>((int)(point.x / CellSizeAsCoordinates + GridSideSize / 2), 
-                (int)(point.y / CellSizeAsCoordinates + GridSideSize / 2));
+            return GetIndexesByCoordinates(point.x, point.y);
+        }
+
+        public static Tuple<int, int> GetIndexesByCoordinates(float x, float y)
+        {
+            return new Tuple<int, int>((int)(x / CellSizeAsCoordinates + GridSideSize / 2),
+                (int)(y / CellSizeAsCoordinates + GridSideSize / 2));
+        }
+
+        public static Tuple<int, int> GetIndexesByCoordinates(Vector3 point)
+        {
+            return GetIndexesByCoordinates(point.x, point.z);
         }
 
         public bool CanBuild(IntStruct indexes, Building building)
         {
             int x = indexes.Item1;
             int y = indexes.Item2;
-            if (x - building. center.Item1 < 0 ||
+            if (x - building.center.Item1 < 0 ||
                 y - building.center.Item2 < 0 ||
-                x - building.center.Item1 + building.GridProjection.matrix.GetLength(0)-1 >= Grid.GetLength(0) ||
-                y - building.center.Item2 + building.GridProjection.matrix.GetLength(1)-1 >= Grid.GetLength(1)) return false;
+                x - building.center.Item1 + building.GridProjection.matrix.GetLength(0) - 1 >= Grid.GetLength(0) ||
+                y - building.center.Item2 + building.GridProjection.matrix.GetLength(1) - 1 >= Grid.GetLength(1)) return false;
             for (int i = x - building.center.Item1; i < x - building.center.Item1 + building.GridProjection.matrix.GetLength(0); i++)
                 for (int j = y - building.center.Item2; j < y - building.center.Item2 + building.GridProjection.matrix.GetLength(1); j++)
                     if (building.GridProjection.matrix[i - x + building.center.Item1, j - y + building.center.Item2] != BuildingHelper.CellState.Empty && Grid[i, j] != null)
@@ -155,23 +167,23 @@ namespace Game
             System.Random random = new System.Random(seed.GetHashCode());
             int spaceCounter = 0;
             List<int> xSpaces = new List<int>();
-            for(int i=0;i< GridSideSize - 3;i++,spaceCounter++)
+            for (int i = 0; i < GridSideSize - 3; i++, spaceCounter++)
             {
-                if(spaceCounter +random.Next(8)>10+random.Next(3))
+                if (spaceCounter + random.Next(8) > 10 + random.Next(3))
                 {
-                    for(int j=0; j<=GridSideSize;j++)
+                    for (int j = 0; j <= GridSideSize; j++)
                     {
-                        Road road= city.AddComponent<Road>();
+                        Road road = city.AddComponent<Road>();
                         Buildings.Add(road);
                         IntStruct tuple = new IntStruct(i, j);
                         if (CanBuild(tuple, road))
-                            road.Build("", this, tuple,null);
+                            road.Build("", this, tuple, null);
                     }
                     xSpaces.Add(spaceCounter);
                     spaceCounter = -1;
                 }
             }
-            xSpaces.Add(spaceCounter+2);
+            xSpaces.Add(spaceCounter + 2);
             spaceCounter = 0;
             List<int> zSpaces = new List<int>();
             for (int i = 0; i < GridSideSize - 3; i++, spaceCounter++)
@@ -183,35 +195,53 @@ namespace Game
                         Road road = city.AddComponent<Road>();
                         Buildings.Add(road);
                         IntStruct tuple = new IntStruct(j, i);
-                        if (CanBuild(tuple,road))
-                            road.Build("", this, tuple,null);
+                        if (CanBuild(tuple, road))
+                            road.Build("", this, tuple, null);
                     }
                     zSpaces.Add(spaceCounter);
                     spaceCounter = -1;
                 }
             }
-            zSpaces.Add(spaceCounter+2);
+            zSpaces.Add(spaceCounter + 2);
 
-            for(int i =0;i<Grid.GetLength(0);i++)
+            for (int i = 0; i < Grid.GetLength(0); i++)
                 for (int j = 0; j < Grid.GetLength(1); j++)
                 {
-                    if(i==0||Grid[i-1,j]is Road
-                        ||i+1== Grid.GetLength(0)||Grid[i+1,j]is Road
-                        || j == 0 || Grid[i, j-1] is Road
-                        || j + 1 == Grid.GetLength(1) || Grid[i , j+1] is Road)
+                    if (i == 0 || Grid[i - 1, j] is Road
+                        || i + 1 == Grid.GetLength(0) || Grid[i + 1, j] is Road
+                        || j == 0 || Grid[i, j - 1] is Road
+                        || j + 1 == Grid.GetLength(1) || Grid[i, j + 1] is Road)
                     {
-                        Sidewalk sidewalk= city.AddComponent<Sidewalk>();
+                        Sidewalk sidewalk = city.AddComponent<Sidewalk>();
                         Buildings.Add(sidewalk);
                         IntStruct tuple = new IntStruct(i, j);
                         if (CanBuild(tuple, sidewalk))
                             sidewalk.Build("", this, tuple, null);
                     }
                 }
+            Graph<Sidewalk> sidewalksGraph = new Graph<Sidewalk>();
+            for (int i = 0; i < Grid.GetLength(0); i++)
+                for (int j = 0; j < Grid.GetLength(1); j++)
+                    if (Grid[i, j] is Sidewalk sidewalk)
+                    {
+                        var node = sidewalksGraph.AddNode(sidewalk);
+                        if (i > 0 && Grid[i - 1, j] is Sidewalk sidewalkLeft)
+                        {
+                            var nodeLeft = sidewalksGraph.Nodes.Where(node => node.Item == sidewalkLeft).FirstOrDefault();
+                            if (nodeLeft != null) sidewalksGraph.Bind(node, nodeLeft);
+                        }
+                        if (j > 0 && Grid[i, j - 1] is Sidewalk sidewalkUp)
+                        {
+                            var nodeUp = sidewalksGraph.Nodes.Where(node => node.Item == sidewalkUp).FirstOrDefault();
+                            if (nodeUp != null) sidewalksGraph.Bind(node, nodeUp);
+                        }
+                    }
+
 
             Debug.Log($"Generating roads: {(DateTime.Now - milli).TotalMilliseconds}");
 
             List<IntStruct[,]> districts = new List<IntStruct[,]>();
-            int xSum=0, zSum=0;
+            int xSum = 0, zSum = 0;
             for (int x = 0; x < xSpaces.Count; x++)
             {
                 for (int z = 0; z < zSpaces.Count; z++)
@@ -227,12 +257,12 @@ namespace Game
                 xSum += xSpaces[x];
             }
 
-            foreach(var district in districts.OrderBy(a=>random.Next()))
+            foreach (var district in districts.OrderBy(a => random.Next()))
             {
                 Building component = GetRandomComponent(random);
                 Buildings.Add(component);
-                foreach(var indexes in district.AsIEnumerable().OrderBy(a => random.Next()))
-                    if(CanBuild(indexes,component))
+                foreach (var indexes in district.AsIEnumerable().OrderBy(a => random.Next()))
+                    if (CanBuild(indexes, component))
                     {
                         component.Build("", this, indexes, null);
                         break;
@@ -246,7 +276,7 @@ namespace Game
             do
             {
                 var index = new IntStruct(random.Next(GridSideSize), random.Next(GridSideSize));
-                if(CanBuild(index,home))
+                if (CanBuild(index, home))
                 {
                     home.Build("", this, index, null);
                     home = city.AddComponent<Home>();
@@ -254,13 +284,13 @@ namespace Game
                 }
                 counter++;
             }
-            while (counter + random.Next(GridSideSize / 2) < GridSideSize*2);
+            while (counter + random.Next(GridSideSize / 2) < GridSideSize * 2);
         }
 
         private Building GetRandomComponent(System.Random random)
         {
-            Building result=null;
-            switch(random.Next(4))
+            Building result = null;
+            switch (random.Next(4))
             {
                 case 0:
                     result = city.AddComponent<Shop>();
