@@ -6,27 +6,27 @@ namespace Game
 {
     public class Graph<T>
     {
-
-        public List<Node<T>> Nodes { get; private set; } = new List<Node<T>>();
-        public List<Edge<T>> Edges { get; private set; } = new List<Edge<T>>();
+    
+        public List<Node> Nodes { get; private set; } = new List<Node>();
+        public List<Edge> Edges { get; private set; } = new List<Edge>();
 
         public Graph()
         {
 
         }
 
-        public Node<T> AddNode(Node<T> node)
+        public Node AddNode(Node node)
         {
             Nodes.Add(node);
             return node;
         }
 
-        public Node<T> AddNode(T item)
+        public Node AddNode(T item)
         {
-            return AddNode(new Node<T>(item));
+            return AddNode(new Node(item));
         }
 
-        public void RemoveNode(Node<T> node)
+        public void RemoveNode(Node node)
         {
             Nodes.Remove(node);
             foreach (var edge in node.Edges)
@@ -49,9 +49,9 @@ namespace Game
             }
         }
 
-        public void Bind(Node<T> node1, Node<T> node2)
+        public void Bind(Node node1, Node node2)
         {
-            Edge<T> edge = new Edge<T>(node1, node2);
+            Edge edge = new Edge(node1, node2);
             Edges.Add(edge);
             node1.AddEdge(edge);
             node2.AddEdge(edge);
@@ -62,16 +62,16 @@ namespace Game
             Bind(AddNode(item1), AddNode(item2));
         }
 
-        public void Disbind(Node<T> node1, Node<T> node2)
+        public void Disbind(Node node1, Node node2)
         {
             if (node2.Edges.Count < node1.Edges.Count)
             {
-                Node<T> temp = node1;
+                Node temp = node1;
                 node1 = node2;
                 node2 = temp;
             }
 
-            List<Edge<T>> toRemove = new List<Edge<T>>();
+            List<Edge> toRemove = new List<Edge>();
             foreach (var edge in node1.Edges)
             {
                 if (edge.Node1.Equals(node2) || edge.Node2.Equals(node2))
@@ -89,7 +89,7 @@ namespace Game
 
         public void Disbind(T item1, T item2)
         {
-            Node<T> node1 = null, node2 = null;
+            Node node1 = null, node2 = null;
             foreach (var node in Nodes)
             {
                 if (node.Item.Equals(item1))
@@ -101,12 +101,12 @@ namespace Game
             Disbind(node1, node2);
         }
 
-        public class Edge<T>
+        public class Edge
         {
-            public Node<T> Node1 { get; internal set; }
-            public Node<T> Node2 { get; internal set; }
+            public Node Node1 { get; internal set; }
+            public Node Node2 { get; internal set; }
 
-            internal Edge(Node<T> node1, Node<T> node2)
+            internal Edge(Node node1, Node node2)
             {
                 Node1 = node1;
                 Node2 = node2;
@@ -114,18 +114,18 @@ namespace Game
 
         }
 
-        public class Node<T>
+        public class Node
         {
-            public List<Edge<T>> Edges { get; private set; } = new List<Edge<T>>();
+            public List<Edge> Edges { get; private set; } = new List<Edge>();
 
             public T Item { get; private set; }
 
-            internal void AddEdge(Edge<T> edge)
+            internal void AddEdge(Edge edge)
             {
                 Edges.Add(edge);
             }
 
-            internal void RemoveEdge(Edge<T> edge)
+            internal void RemoveEdge(Edge edge)
             {
                 Edges.Remove(edge);
             }

@@ -44,9 +44,9 @@ namespace Assets.Scripts
 
     public class RobotPathController : AutoMover.PathController
     {
-        private Graph<Sidewalk>.Node<Sidewalk >current, previous;
+        private Graph<Sidewalk>.Node current, previous;
 
-        public RobotPathController(Graph<Sidewalk>.Node<Sidewalk> entry)
+        public RobotPathController(Graph<Sidewalk>.Node entry)
         {
             current = entry;
         }
@@ -54,7 +54,7 @@ namespace Assets.Scripts
         public override Vector3 GetNextPoint(GameObject gameObject)
         {
             System.Random random = new System.Random();
-            Graph<Sidewalk>.Node<Sidewalk> newWayPoint= current.Edges.Select(edge => edge.Node1 == current ? edge.Node2 : edge.Node1)
+            Graph<Sidewalk>.Node newWayPoint= current.Edges.Select(edge => edge.Node1 == current ? edge.Node2 : edge.Node1)
                 .Where(node => node != previous).OrderBy(node => random.Next()).First();
             previous = current;
             current = newWayPoint;

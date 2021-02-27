@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using static Game.ExtensionMethods;
 
 namespace Game
 {
@@ -112,49 +113,14 @@ namespace Game
                 item.UpdateSatisfaction();
         }
 
-        public static Tuple<int, int> GetMouseIndex()
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            Plane plane = new Plane(Vector3.up, Vector3.zero);
-            plane.Raycast(ray, out float distance);
-            Vector3 point = ray.GetPoint(distance);
-            return GetIndexesByCoordinates(point.x, point.y);
-        }
-
-        public static Tuple<int, int> GetIndexesByCoordinates(float x, float y)
-        {
-            return new Tuple<int, int>((int)(x / CellSizeAsCoordinates + GridSideSize / 2),
-                (int)(y / CellSizeAsCoordinates + GridSideSize / 2));
-        }
-
-        public static Tuple<int, int> GetIndexesByCoordinates(Vector3 point)
-        {
-            return GetIndexesByCoordinates(point.x, point.z);
-        }
-
-        public bool CanBuild(IntStruct indexes, Building building)
-        {
-            int x = indexes.Item1;
-            int y = indexes.Item2;
-            if (x - building.center.Item1 < 0 ||
-                y - building.center.Item2 < 0 ||
-                x - building.center.Item1 + building.GridProjection.matrix.GetLength(0) - 1 >= Grid.GetLength(0) ||
-                y - building.center.Item2 + building.GridProjection.matrix.GetLength(1) - 1 >= Grid.GetLength(1)) return false;
-            for (int i = x - building.center.Item1; i < x - building.center.Item1 + building.GridProjection.matrix.GetLength(0); i++)
-                for (int j = y - building.center.Item2; j < y - building.center.Item2 + building.GridProjection.matrix.GetLength(1); j++)
-                    if (building.GridProjection.matrix[i - x + building.center.Item1, j - y + building.center.Item2] != BuildingHelper.CellState.Empty && Grid[i, j] != null)
-                        return false;
-            return true;
-        }
 
         public void ProceduralGenerating(string seed)
         {
             DateTime milli = DateTime.Now;
 
 
-            foreach (var item in Buildings)
+            foreach (var item in Buildings.Select(building => building.gameObject))
             {
-                Destroy(item.model);
                 Destroy(item);
             }
             Grid = new Building[GridSideSize, GridSideSize];
@@ -173,11 +139,16 @@ namespace Game
                 {
                     for (int j = 0; j <= GridSideSize; j++)
                     {
-                        Road road = city.AddComponent<Road>();
-                        Buildings.Add(road);
-                        IntStruct tuple = new IntStruct(i, j);
-                        if (CanBuild(tuple, road))
-                            road.Build("", this, tuple, null);
+                        IntStruct indexes = new IntStruct(i, j);
+                        if (CanPlace(this, indexes, Road.defaultProjection))
+                            Instantiate(PrefabManager.Manager.roadPrefab)
+                                .GetComponent<Road>().Initialize(this, indexes);
+
+                        //Road road = city.AddComponent<Road>();
+                        //Buildings.Add(road);
+                        //IntStruct tuple = new IntStruct(i, j);
+                        //if (CanBuild(tuple, road))
+                        //    road.Build("", this, tuple, null);
                     }
                     xSpaces.Add(spaceCounter);
                     spaceCounter = -1;
@@ -192,11 +163,10 @@ namespace Game
                 {
                     for (int j = 0; j <= GridSideSize; j++)
                     {
-                        Road road = city.AddComponent<Road>();
-                        Buildings.Add(road);
-                        IntStruct tuple = new IntStruct(j, i);
-                        if (CanBuild(tuple, road))
-                            road.Build("", this, tuple, null);
+                        IntStruct indexes = new IntStruct(i, j);
+                        if (CanPlace(this, indexes, Road.defaultProjection))
+                            Instantiate(PrefabManager.Manager.roadPrefab)
+                                .GetComponent<Road>().Initialize(this, indexes);
                     }
                     zSpaces.Add(spaceCounter);
                     spaceCounter = -1;
@@ -212,11 +182,10 @@ namespace Game
                         || j == 0 || Grid[i, j - 1] is Road
                         || j + 1 == Grid.GetLength(1) || Grid[i, j + 1] is Road)
                     {
-                        Sidewalk sidewalk = city.AddComponent<Sidewalk>();
-                        Buildings.Add(sidewalk);
-                        IntStruct tuple = new IntStruct(i, j);
-                        if (CanBuild(tuple, sidewalk))
-                            sidewalk.Build("", this, tuple, null);
+                        IntStruct indexes = new IntStruct(i, j);
+                        if (CanPlace(this, indexes, Sidewalk.defaultProjection))
+                            Instantiate(PrefabManager.Manager.sidewalkPrefab)
+                                .GetComponent<Sidewalk>().Initialize(this, indexes);
                     }
                 }
             Graph<Sidewalk> sidewalksGraph = new Graph<Sidewalk>();
@@ -224,18 +193,23 @@ namespace Game
                 for (int j = 0; j < Grid.GetLength(1); j++)
                     if (Grid[i, j] is Sidewalk sidewalk)
                     {
-                        var node = sidewalksGraph.AddNode(sidewalk);
+                        var newNode = sidewalksGraph.AddNode(sidewalk);
                         if (i > 0 && Grid[i - 1, j] is Sidewalk sidewalkLeft)
                         {
                             var nodeLeft = sidewalksGraph.Nodes.Where(node => node.Item == sidewalkLeft).FirstOrDefault();
-                            if (nodeLeft != null) sidewalksGraph.Bind(node, nodeLeft);
+                            if (nodeLeft != null) sidewalksGraph.Bind(newNode, nodeLeft);
                         }
                         if (j > 0 && Grid[i, j - 1] is Sidewalk sidewalkUp)
                         {
                             var nodeUp = sidewalksGraph.Nodes.Where(node => node.Item == sidewalkUp).FirstOrDefault();
-                            if (nodeUp != null) sidewalksGraph.Bind(node, nodeUp);
+                            if (nodeUp != null) sidewalksGraph.Bind(newNode, nodeUp);
                         }
                     }
+
+            foreach (var node in sidewalksGraph.Nodes.OrderBy(node => random.Next()).Take(random.Next(10, 20)))
+            {
+                //Citizen generating
+            }
 
 
             Debug.Log($"Generating roads: {(DateTime.Now - milli).TotalMilliseconds}");
@@ -259,50 +233,62 @@ namespace Game
 
             foreach (var district in districts.OrderBy(a => random.Next()))
             {
-                Building component = GetRandomComponent(random);
-                Buildings.Add(component);
-                foreach (var indexes in district.AsIEnumerable().OrderBy(a => random.Next()))
-                    if (CanBuild(indexes, component))
-                    {
-                        component.Build("", this, indexes, null);
+                foreach (var index in district)
+                    if (BuildRandomBuilding(random, index))
                         break;
-                    }
             }
 
 
             int counter = 0;
-            Home home = city.AddComponent<Home>();
-            Buildings.Add(home);
             do
             {
                 var index = new IntStruct(random.Next(GridSideSize), random.Next(GridSideSize));
-                if (CanBuild(index, home))
-                {
-                    home.Build("", this, index, null);
-                    home = city.AddComponent<Home>();
-                    Buildings.Add(home);
-                }
+
+                if (CanPlace(this, index, Home.defaultProjection))
+                    Instantiate(PrefabManager.Manager.homePrefab)
+                        .GetComponent<Home>().Initialize(this, index);
+
                 counter++;
             }
             while (counter + random.Next(GridSideSize / 2) < GridSideSize * 2);
         }
 
-        private Building GetRandomComponent(System.Random random)
+        private bool BuildRandomBuilding(System.Random random, IntStruct index)
         {
-            Building result = null;
+            bool result = false;
             switch (random.Next(4))
             {
                 case 0:
-                    result = city.AddComponent<Shop>();
+                    if (CanPlace(this, index, CarPark.defaultProjection))
+                    {
+                        Instantiate(PrefabManager.Manager.carParkPrefab)
+                            .GetComponent<CarPark>().Initialize(this, index);
+                        result = true;
+                    }
                     break;
                 case 1:
-                    result = city.AddComponent<ScienceCenter>();
+                    if (CanPlace(this, index, Park.defaultProjection))
+                    {
+                        Instantiate(PrefabManager.Manager.parkPrefab)
+                            .GetComponent<Park>().Initialize(this, index);
+                        result = true;
+                    }
                     break;
                 case 2:
-                    result = city.AddComponent<Park>();
+                    if (CanPlace(this, index, ScienceCenter.defaultProjection))
+                    {
+                        Instantiate(PrefabManager.Manager.scienceCenterPrefab)
+                            .GetComponent<ScienceCenter>().Initialize(this, index);
+                        result = true;
+                    }
                     break;
                 case 3:
-                    result = city.AddComponent<CarPark>();
+                    if (CanPlace(this, index, Shop.defaultProjection))
+                    {
+                        Instantiate(PrefabManager.Manager.shopPrefab)
+                            .GetComponent<Shop>().Initialize(this, index);
+                        result = true;
+                    }
                     break;
             }
             return result;
@@ -313,26 +299,64 @@ namespace Game
             ProceduralGenerating(GameObject.Find("InputSeed").GetComponent<InputField>().text);
         }
 
-        public struct IntStruct
-        {
-            public int Item1, Item2;
-
-            public IntStruct(int first, int second)
-            {
-                Item1 = first;
-                Item2 = second;
-            }
-        }
+        
         public enum GameStage
         { First, Second, Thrid }
     }
 
-    public static class Extensionmethods
+    public struct IntStruct
+    {
+        public int Item1, Item2;
+
+        public IntStruct(int first, int second)
+        {
+            Item1 = first;
+            Item2 = second;
+        }
+    }
+
+    public static class ExtensionMethods
     {
         public static IEnumerable<T> AsIEnumerable<T>(this T[,] matrix)
         {
             foreach (var item in matrix)
                 yield return item;
+        }
+
+        public static Tuple<int, int> GetIndexesByCoordinates(float x, float y)
+        {
+            return new Tuple<int, int>((int)(x / City.CellSizeAsCoordinates + City.GridSideSize / 2),
+                (int)(y / City.CellSizeAsCoordinates + City.GridSideSize / 2));
+        }
+
+        public static Tuple<int, int> GetIndexesByCoordinates(Vector3 point)
+        {
+            return GetIndexesByCoordinates(point.x, point.z);
+        }
+
+        public static Tuple<int, int> GetMouseIndex()
+        {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Plane plane = new Plane(Vector3.up, Vector3.zero);
+            plane.Raycast(ray, out float distance);
+            Vector3 point = ray.GetPoint(distance);
+            return GetIndexesByCoordinates(point.x, point.y);
+        }
+
+        public static bool CanPlace(City city,IntStruct indexes, Projection projection)
+        {
+            int x = indexes.Item1;
+            int y = indexes.Item2;
+            if (x - projection.centerX < 0 ||
+                y - projection.centerY < 0 ||
+                x - projection.centerX + projection.matrix.GetLength(0) - 1 >= city.Grid.GetLength(0) ||
+                y - projection.centerY + projection.matrix.GetLength(1) - 1 >= city.Grid.GetLength(1)) return false;
+            for (int i = x - projection.centerX; i < x - projection.centerX + projection.matrix.GetLength(0); i++)
+                for (int j = y - projection.centerY; j < y - projection.centerY + projection.matrix.GetLength(1); j++)
+                    if (projection.matrix[i - x + projection.centerX, j - y + projection.centerY]
+                        != CellState.Empty && city.Grid[i, j] != null)
+                        return false;
+            return true;
         }
     }
 }

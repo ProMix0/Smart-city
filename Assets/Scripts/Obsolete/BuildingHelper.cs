@@ -92,7 +92,6 @@ namespace Game
         //    //Change color of build zone
         //}
 
-        public enum CellState
-        { Empty, Fill, Center }
+        
     }
 }

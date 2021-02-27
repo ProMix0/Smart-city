@@ -1,0 +1,29 @@
+fileFormatVersion: 2
+guid: e4c51b7732b53e947a400e03c03eacf9
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - robotPrefab: {fileID: 2979600430302108, guid: 6fa9615a7c81b65409ad11079ab728ce,
+      type: 3}
+  - carParkPrefab: {fileID: 8160598611321741586, guid: 6ef9ae1a7b0fb214db0f7e0248a4fb05,
+      type: 3}
+  - homePrefab: {fileID: 5743057634003065429, guid: 254d61ab9efb71b469d714b8f23415be,
+      type: 3}
+  - laboratoryPrefab: {fileID: 7022509225033711641, guid: 9138cafc30de2c44b912114966cb8fec,
+      type: 3}
+  - parkPrefab: {fileID: 5161749186095309934, guid: d7f932bfc05755d4eb966c222e4ba99b,
+      type: 3}
+  - roadPrefab: {fileID: 211248900757797995, guid: 503b7daf4aac5dc4586f4cc06024ff61,
+      type: 3}
+  - scienceCenterPrefab: {fileID: 4329324098402833547, guid: a072e13221a2ccf4681e93f3a3558d76,
+      type: 3}
+  - shopPrefab: {fileID: 8654354121014723390, guid: 035bc8bf134d80a418a19e32c4654c82,
+      type: 3}
+  - sidewalkPrefab: {fileID: 4741747615795840051, guid: e0f39ce796a2c8443b7fa93c3aa3f385,
+      type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
