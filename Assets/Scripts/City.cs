@@ -139,6 +139,8 @@ namespace Game
                 {
                     for (int j = 0; j <= GridSideSize; j++)
                     {
+                        Debug.Log(PrefabManager.Manager == null);
+                        Debug.Log(PrefabManager.Manager.roadPrefab == null);
                         IntStruct indexes = new IntStruct(i, j);
                         if (CanPlace(this, indexes, Road.defaultProjection))
                             Instantiate(PrefabManager.Manager.roadPrefab)
